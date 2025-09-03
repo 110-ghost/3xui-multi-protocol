@@ -4,12 +4,12 @@
 # Script Name: 3xui-multi-protocol Installer & Manager (GitHub Version)
 # Description: Clones from GitHub, builds, and manages the .NET application.
 # Author: Gemini AI & User
-# Version: 2.3 (English, with build fix)
+# Version: 2.4 (English, with DB Backup)
 # ==============================================================================
 
 # --- Variables ---
 # !!! Important: Replace this with your own GitHub repository URL !!!
-GIT_REPO_URL="https://github.com/110-ghost/3xui-multi-protocol.git" # Example URL
+GIT_REPO_URL="https://github.com/Your-Username/Your-Repo-Name.git"
 
 APP_NAME="3xui-multi-protocol"
 INSTALL_DIR="/opt/$APP_NAME"
@@ -21,8 +21,6 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
-
-# ... (بقیه توابع بدون تغییر باقی می‌مانند) ...
 
 # --- Helper Functions ---
 
@@ -77,10 +75,7 @@ install_app() {
     if [[ $? -ne 0 ]]; then echo -e "${RED}Error cloning the repository. Check the GIT_REPO_URL in the script.${NC}"; rm -rf "$TEMP_DIR"; exit 1; fi
     
     echo -e "${YELLOW}Building and publishing the application...${NC}"
-    # ========== CHANGE IS HERE ==========
-    # We are now specifying the project directory directly to avoid the warning.
     dotnet publish "$TEMP_DIR/$APP_NAME" -c Release -r linux-x64 --self-contained false -o "$INSTALL_DIR"
-    # ====================================
     if [[ $? -ne 0 ]]; then echo -e "${RED}Error building the application. Please check the logs.${NC}"; rm -rf "$TEMP_DIR"; exit 1; fi
     
     rm -rf "$TEMP_DIR"
@@ -101,6 +96,12 @@ StandardError=journal
 [Install]
 WantedBy=multi-user.target
 EOF
+
+    # ========== NEW FEATURE: DATABASE BACKUP ==========
+    echo -e "${YELLOW}Backing up x-ui database to /etc/x-ui/backup.db...${NC}"
+    cp /etc/x-ui/x-ui.db /etc/x-ui/backup.db
+    # ==================================================
+
     echo -e "${YELLOW}Enabling and starting the service...${NC}"
     systemctl daemon-reload
     systemctl enable "$SERVICE_NAME"
@@ -110,8 +111,6 @@ EOF
     echo -e "${GREEN}===============================================${NC}"
     show_status
 }
-
-# ... (بقیه اسکریپت بدون تغییر) ...
 
 uninstall_app() {
     if ! is_installed; then echo -e "${RED}Application is not installed.${NC}"; return; fi
