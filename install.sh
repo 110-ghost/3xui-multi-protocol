@@ -4,11 +4,11 @@
 # Script Name: 3xui-multi-protocol Installer & Manager (GitHub Version)
 # Description: Clones from GitHub, builds, and manages the .NET application.
 # Author: Gemini AI & User
-# Version: 2.4 (English, with DB Backup)
+# Version: 3.0 (Cleaned - No Repo Editing)
 # ==============================================================================
 
 # --- Variables ---
-# !!! Important: Replace this with your own GitHub repository URL !!!
+# !!! Important: Replace this with your public GitHub repository URL !!!
 GIT_REPO_URL="https://github.com/110-ghost/3xui-multi-protocol.git"
 
 APP_NAME="3xui-multi-protocol"
@@ -79,6 +79,7 @@ install_app() {
     if [[ $? -ne 0 ]]; then echo -e "${RED}Error building the application. Please check the logs.${NC}"; rm -rf "$TEMP_DIR"; exit 1; fi
     
     rm -rf "$TEMP_DIR"
+    
     echo -e "${YELLOW}Creating systemd service...${NC}"
     cat << EOF > "$SERVICE_FILE_PATH"
 [Unit]
@@ -97,10 +98,12 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
 
-    # ========== NEW FEATURE: DATABASE BACKUP ==========
     echo -e "${YELLOW}Backing up x-ui database to /etc/x-ui/backup.db...${NC}"
-    cp /etc/x-ui/x-ui.db /etc/x-ui/backup.db
-    # ==================================================
+    if [ -f /etc/x-ui/x-ui.db ]; then
+        cp /etc/x-ui/x-ui.db /etc/x-ui/backup.db
+    else
+        echo -e "${YELLOW}Warning: /etc/x-ui/x-ui.db not found. Skipping backup.${NC}"
+    fi
 
     echo -e "${YELLOW}Enabling and starting the service...${NC}"
     systemctl daemon-reload
@@ -123,51 +126,6 @@ uninstall_app() {
     systemctl daemon-reload
     if [[ "$1" != "silent" ]]; then echo -e "${GREEN}Application uninstalled successfully.${NC}"; fi
 }
-
-clean_repo_files() {
-    echo "--- Clean Default GitHub Files ---"
-    read -p "This will clone your repo, remove files, and push. Are you sure? (y/n): " confirm
-    if [[ "$confirm" != "y" ]]; then echo "Operation cancelled."; return; fi
-
-    if ! command -v git &> /dev/null; then echo -e "${RED}Git is not installed.${NC}"; return; fi
-
-    TEMP_DIR=$(mktemp -d)
-    echo -e "${YELLOW}Cloning repository...${NC}"
-    git clone "$GIT_REPO_URL" "$TEMP_DIR"
-    if [[ $? -ne 0 ]]; then echo -e "${RED}Failed to clone repository.${NC}"; rm -rf "$TEMP_DIR"; return; fi
-
-    cd "$TEMP_DIR"
-    
-    echo -e "${YELLOW}Removing .gitignore and .gitattributes files...${NC}"
-    git rm -f --ignore-unmatch .gitignore .gitattributes
-    
-    if [[ $(git status --porcelain | wc -l) -eq 0 ]]; then
-        echo -e "${GREEN}Files do not exist or were already removed. Nothing to do.${NC}"
-        cd .. && rm -rf "$TEMP_DIR"
-        return
-    fi
-    
-    echo -e "${YELLOW}Please configure your Git identity for the commit.${NC}"
-    read -p "Enter your Git User Name: " git_user_name
-    read -p "Enter your Git User Email: " git_user_email
-    git config user.name "$git_user_name"
-    git config user.email "$git_user_email"
-
-    echo -e "${YELLOW}Committing the changes...${NC}"
-    git commit -m "chore: Remove default git files"
-    
-    echo -e "${YELLOW}Pushing to GitHub... (Enter username and Personal Access Token when prompted)${NC}"
-    git push origin main
-    
-    if [[ $? -eq 0 ]]; then
-        echo -e "${GREEN}Successfully cleaned the repository!${NC}"
-    else
-        echo -e "${RED}Failed to push changes to GitHub.${NC}"
-    fi
-
-    cd .. && rm -rf "$TEMP_DIR"
-}
-
 
 start_service() { systemctl start "$SERVICE_NAME"; echo "Service started."; }
 stop_service() { systemctl stop "$SERVICE_NAME"; echo "Service stopped."; }
@@ -213,7 +171,6 @@ show_menu() {
     echo -e "   ${YELLOW}--- Tools ---${NC}"
     echo -e "   ${GREEN}6)${NC} View Full Status"
     echo -e "   ${YELLOW}7)${NC} View Live Logs"
-    echo -e "   ${RED}8)${NC} Clean Default GitHub Files (.gitignore, etc.)"
     echo " "
     echo -e "   ${RED}0)${NC} Exit"
     echo "========================================"
@@ -233,7 +190,6 @@ while true; do
         5) restart_service; read -p "Press Enter to return..." ;;
         6) systemctl status "$SERVICE_NAME" --no-pager; read -p "Press Enter to return..." ;;
         7) view_logs ;;
-        8) clean_repo_files; read -p "Press Enter to return..." ;;
         0) echo "Exiting."; exit 0 ;;
         *) echo -e "${RED}Invalid option!${NC}"; sleep 2 ;;
     esac
