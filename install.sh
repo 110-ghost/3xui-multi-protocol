@@ -9,7 +9,7 @@
 
 # --- Variables ---
 # !!! Important: Replace this with your own GitHub repository URL !!!
-GIT_REPO_URL="https://github.com/Your-Username/Your-Repo-Name.git"
+GIT_REPO_URL="https://github.com/110-ghost/3xui-multi-protocol.git"
 
 APP_NAME="3xui-multi-protocol"
 INSTALL_DIR="/opt/$APP_NAME"
