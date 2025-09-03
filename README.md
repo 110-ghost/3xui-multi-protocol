@@ -1,4 +1,8 @@
-# فقط روی ورژن 2.1.3 پنل تست شده است
+این پروژه از روی 
+# https://github.com/M4mmad/3xui-multi-protocol
+ساخته شده و تعغیرات داده شده برای net8.0 و نصب روی اوبونتو 24 
+روی سیستم عامل های دیگه باید تست بشه 
+پروژه در حال تسته !!!!
 # 3xui-multi-protocol
 
 
@@ -10,7 +14,7 @@
 از کد زیر جهت استفاده از اسکریپت استفاده کنید. با زدن کد زیر بصورت خودکار اسکریپت اجرا می شود و هر 25 ثانیه ترافیک کاربرانی را که دارای لینک سابسکریپشن یکسانی هستند را یکسان سازی می کند.
 
 ```bash
-bash <(curl -Ls https://github.com/110-ghost/3xui-multi-protocol/blob/master/install.sh --ipv4)
+bash <(curl -Ls https://raw.githubusercontent.com/110-ghost/3xui-multi-protocol/master/install.sh --ipv4)
 ```
 
 ##  توجه 
@@ -26,18 +30,3 @@ bash <(curl -Ls https://github.com/110-ghost/3xui-multi-protocol/blob/master/ins
 ## Stop
 برای کاهش حجم و یا ریست ترافیک کاربر لازم است سرویس را متوقف کنید!
 
-برای توقف اجرای اسکریپت کافیست کد زیر رو وارد کنید.
-
-```bash
-systemctl stop 3xui-multi-protocol
-```
-
-اجرای دوباره :
-```bash
-systemctl start 3xui-multi-protocol
-```
-
-#حذف
-```bash
-bash <(curl -Ls https://raw.githubusercontent.com/M4mmad/3xui-multi-protocol/master/unistall.sh --ipv4)
-```
