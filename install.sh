@@ -203,6 +203,7 @@ show_menu() {
     echo "========================================"
     echo "   3xui-multi-protocol Application Manager"
     echo "          (Install from GitHub)"
+    echo "                 (GHOST)                 "
     echo "========================================"
     show_status
     echo "Select an option:"
